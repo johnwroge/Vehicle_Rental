@@ -22,3 +22,7 @@ To use the Car Rental microservice, first change into the API directory.
 
 `pip install -r requirements.txt` 
 
+Run the server:
+
+`python app.py`
+
