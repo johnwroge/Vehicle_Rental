@@ -4,10 +4,26 @@ from datetime import datetime
 from mysql.connector import Error
 from database import Database
 from models import Vehicle, VehicleStatus
+import logging
 
 class VehicleRepository:
     def __init__(self):
         self.db = Database()
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        
+        file_handler = logging.FileHandler('vehicle_repository.log')
+        file_handler.setLevel(logging.INFO)
+        
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
+
+        self.logger.addHandler(file_handler)
+        self.logger.addHandler(console_handler)
 
     def create(self, vehicle: Vehicle) -> int:
         with self.db.get_cursor() as cursor:

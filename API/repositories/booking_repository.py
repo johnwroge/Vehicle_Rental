@@ -69,10 +69,19 @@ class BookingRepository:
         """, (booking_id, amount, invoice_number))
 
     def _log_email(self, cursor, booking_id: int, email_type: str):
+        email_type_map = {
+            'update': 'confirmation',  # Map 'update' to 'confirmation'
+            'confirmation': 'confirmation',
+            'invoice': 'invoice',
+            'cancelled': 'cancelled'
+        }
+        
+        mapped_type = email_type_map.get(email_type, 'confirmation')
+        
         cursor.execute("""
             INSERT INTO EmailLogs (booking_id, email_type)
             VALUES (%s, %s)
-        """, (booking_id, email_type))
+        """, (booking_id, mapped_type))
 
     def update(self, booking_id: int, updated_booking: Booking) -> bool:
         self.logger.info(f"Updating booking: {booking_id}")

@@ -12,6 +12,7 @@ class BookingService:
         booking = Booking(**booking_data)
         
         errors = booking.validate_dates()
+        
         if errors:
             raise ValueError(", ".join(errors))
             
