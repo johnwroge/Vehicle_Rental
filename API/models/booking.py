@@ -15,8 +15,10 @@ class Booking:
     created_at: Optional[datetime] = None
 
     def __post_init__(self):
-        self.pickup_date = datetime.strptime(self.pickup_date, "%Y-%m-%dT%H:%M:%S")
-        self.return_date = datetime.strptime(self.return_date, "%Y-%m-%dT%H:%M:%S")
+        # self.pickup_date = datetime.strptime(self.pickup_date, "%Y-%m-%dT%H:%M:%S")
+        # self.return_date = datetime.strptime(self.return_date, "%Y-%m-%dT%H:%M:%S")
+        self.pickup_date = datetime.fromisoformat(self.pickup_date)
+        self.return_date = datetime.fromisoformat(self.return_date)
         self.created_at = self.created_at or datetime.now()
 
     def validate_dates(self) -> List[str]:
