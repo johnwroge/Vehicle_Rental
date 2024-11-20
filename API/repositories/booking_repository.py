@@ -4,17 +4,26 @@ from models import User, Vehicle, Booking
 from typing import List, Optional
 from mysql.connector import Error
 from datetime import datetime
+import logging
 
 class BookingRepository:
     def __init__(self):
         self.db = Database()
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        file_handler = logging.FileHandler('booking_repository.log')
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
 
     def create(self, booking: Booking) -> int:
+        self.logger.info(f"Creating new booking: {booking}")
         with self.db.get_cursor() as cursor:
  
             cursor.execute("START TRANSACTION")
             try:
                 if not self._is_vehicle_available(cursor, booking):
+                    self.logger.error("Vehicle not available for selected dates")
                     raise ValueError("Vehicle not available for selected dates")
 
                 cursor.execute("""
@@ -22,7 +31,7 @@ class BookingRepository:
                                         return_date, total_cost, status)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (booking.user_id, booking.vehicle_id, booking.pickup_date,
-                      booking.return_date, booking.total_cost, booking.status))
+                      booking.return_date, booking.total_cost, booking.status.value))
                 
                 booking_id = cursor.lastrowid
 

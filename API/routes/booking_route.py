@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from services.booking_service import BookingService
 from datetime import datetime
 from repositories import BookingRepository
+from repositories.vehicle_repository import VehicleRepository
 from database import Database
 
 bookings_api = Blueprint('bookings_api', __name__)
@@ -23,4 +24,19 @@ def create_booking():
             'error': 'An unexpected error occurred while processing your booking request. Please try again later.',
             'details': str(e)
         }), 500
+
+@bookings_api.route('/daily_report', methods=['GET'])
+def get_daily_report():
+    date_str = request.args.get('date')
+    category_id = request.args.get('category_id', type=int)
+
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': 'Invalid date format. Please use YYYY-MM-DD.'}), 400
+
+    vehicle_repo = VehicleRepository()
+    report = vehicle_repo.get_daily_report(date, category_id)
+
+    return jsonify(report), 200
     

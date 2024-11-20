@@ -11,12 +11,10 @@ class BookingService:
     def create_booking(self, booking_data: dict) -> int:
         booking = Booking(**booking_data)
         
-        # Validate booking
         errors = booking.validate_dates()
         if errors:
             raise ValueError(", ".join(errors))
             
-        # Create booking
         return self.booking_repo.create(booking)
 
     def get_daily_report(self, date: datetime, category_id: Optional[int] = None) -> List[dict]:
