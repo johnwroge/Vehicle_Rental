@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services import VehicleService
 from datetime import datetime
-from repositories import BookingRepository
+from repositories import BookingRepository, VehicleRepository
 
 vehicles_api = Blueprint('vehicles_api', __name__)
 
@@ -13,7 +13,7 @@ def check_availability():
         category_id = request.args.get('category_id')
         vehicle_id = request.args.get('vehicle_id')
 
-        vehicle_repo = BookingRepository()
+        vehicle_repo = VehicleRepository()
         vehicle_service = VehicleService(vehicle_repo)
         vehicles = vehicle_service._is_vehicle_available(
             start_date, end_date, category_id, vehicle_id
