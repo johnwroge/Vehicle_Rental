@@ -10,10 +10,11 @@ class UserRepository:
 
     def create(self, user: User) -> int:
         with self.db.get_cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO Users (email, first_name, last_name, password_hash)
-                VALUES (%s, %s, %s, %s)
-            """, (user.email, user.first_name, user.last_name, 'temp_hash'))
+            cursor.execute(
+                "INSERT INTO Users (email, first_name, last_name, password_hash) "
+                "VALUES (%s, %s, %s, %s)",
+                (user.email, user.first_name, user.last_name, 'temp_hash')
+            )
             return cursor.lastrowid
 
     def get_by_id(self, user_id: int) -> Optional[User]:
@@ -24,9 +25,15 @@ class UserRepository:
 
     def update(self, user: User) -> bool:
         with self.db.get_cursor() as cursor:
-            cursor.execute("""
-                UPDATE Users 
-                SET email = %s, first_name = %s, last_name = %s
-                WHERE user_id = %s
-            """, (user.email, user.first_name, user.last_name, user.user_id))
+            cursor.execute(
+                "UPDATE Users "
+                "SET email = %s, first_name = %s, last_name = %s "
+                "WHERE user_id = %s",
+                (user.email, user.first_name, user.last_name, user.user_id)
+            )
+            return cursor.rowcount > 0
+        
+    def delete(self, user_id: int) -> bool:
+        with self.db.get_cursor() as cursor:
+            cursor.execute("DELETE FROM Users WHERE user_id = %s", (user_id,))
             return cursor.rowcount > 0

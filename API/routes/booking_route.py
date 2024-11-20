@@ -25,6 +25,42 @@ def create_booking():
             'details': str(e)
         }), 500
 
+@bookings_api.route('/bookings/<int:booking_id>', methods=['PUT'])
+def update_booking(booking_id):
+    try:
+        booking_repo = BookingRepository()
+        booking_service = BookingService(booking_repo)
+        updated = booking_service.update_booking(booking_id, request.json)
+        if updated:
+            return jsonify({'message': 'Booking updated successfully'}), 200
+        return jsonify({'error': 'Booking not found'}), 404
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        current_app.logger.error(f"Error occurred while updating booking: {e}", exc_info=True)
+        return jsonify({
+            'error': 'An unexpected error occurred while processing your update request. Please try again later.',
+            'details': str(e)
+        }), 500
+
+@bookings_api.route('/bookings/<int:booking_id>', methods=['DELETE'])
+def delete_booking(booking_id):
+    try:
+        booking_repo = BookingRepository()
+        booking_service = BookingService(booking_repo)
+        deleted = booking_service.delete_booking(booking_id)
+        if deleted:
+            return jsonify({'message': 'Booking deleted successfully'}), 200
+        return jsonify({'error': 'Booking not found'}), 404
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        current_app.logger.error(f"Error occurred while deleting booking: {e}", exc_info=True)
+        return jsonify({
+            'error': 'An unexpected error occurred while processing your delete request. Please try again later.',
+            'details': str(e)
+        }), 500
+
 @bookings_api.route('/daily_report', methods=['GET'])
 def get_daily_report():
     date_str = request.args.get('date')

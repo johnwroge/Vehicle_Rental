@@ -45,6 +45,7 @@ CREATE TABLE Bookings (
     pickup_date DATETIME NOT NULL,
     return_date DATETIME NOT NULL,
     total_cost DECIMAL(10,2) NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
     status ENUM('pending', 'active', 'completed', 'cancelled') DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
@@ -66,7 +67,7 @@ CREATE TABLE Invoices (
 CREATE TABLE EmailLogs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     booking_id INT NOT NULL,
-    email_type ENUM('confirmation', 'invoice') NOT NULL,
+    email_type ENUM('confirmation', 'invoice', 'cancelled') NOT NULL,
     sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     status ENUM('sent', 'failed') NOT NULL DEFAULT 'sent',
     FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id)

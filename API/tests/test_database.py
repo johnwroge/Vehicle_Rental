@@ -6,7 +6,7 @@ import logging
 class TestDatabase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        """Called once before all tests."""
+        """Set up before all tests."""
         logging.basicConfig(level=logging.INFO)
         cls.db = Database()  
 

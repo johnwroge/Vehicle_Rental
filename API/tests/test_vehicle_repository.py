@@ -83,7 +83,6 @@ class TestVehicleRepository(unittest.TestCase):
         self.assertEqual(vehicles[0].status, VehicleStatus.AVAILABLE)
 
     def test_get_available_vehicles_by_category(self):
-        # Mock data that matches your vehicle model
         mock_results = [{
             'vehicle_id': 1,
             'category_id': 1,
@@ -103,7 +102,6 @@ class TestVehicleRepository(unittest.TestCase):
     def test_update_status(self):
         self.vehicle_repo.update_status(1, VehicleStatus.RENTED)
         self.cursor_mock.execute.assert_called_once()
-        # Verify status was updated to 'rented'
         call_args = self.cursor_mock.execute.call_args[0]
         self.assertEqual(call_args[1][0], 'rented')
 
@@ -111,7 +109,6 @@ class TestVehicleRepository(unittest.TestCase):
         maintenance_date = datetime.now()
         self.vehicle_repo.update_maintenance(1, maintenance_date)
         self.cursor_mock.execute.assert_called_once()
-        # Verify maintenance date was updated
         call_args = self.cursor_mock.execute.call_args[0]
         self.assertEqual(call_args[1][0], maintenance_date)
 
@@ -132,7 +129,7 @@ class TestVehicleRepository(unittest.TestCase):
         test_date = datetime.now()
         self.vehicle_repo.get_daily_report(test_date, category_id=1)
         self.cursor_mock.execute.assert_called_once()
-        # Verify category filter was applied
+  
         call_args = self.cursor_mock.execute.call_args[0]
         self.assertIn("category_id = %s", call_args[0])
 

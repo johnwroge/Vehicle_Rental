@@ -1,6 +1,6 @@
 
 from database import Database
-from models import User, Vehicle, Booking
+from models import User, Vehicle, Booking, BookingStatus
 from typing import List, Optional
 from mysql.connector import Error
 from datetime import datetime
@@ -73,3 +73,71 @@ class BookingRepository:
             INSERT INTO EmailLogs (booking_id, email_type)
             VALUES (%s, %s)
         """, (booking_id, email_type))
+
+    def update(self, booking_id: int, updated_booking: Booking) -> bool:
+        self.logger.info(f"Updating booking: {booking_id}")
+        with self.db.get_cursor() as cursor:
+            cursor.execute("START TRANSACTION")
+            try:
+                if not self._is_vehicle_available(cursor, updated_booking):
+                    self.logger.error("Vehicle not available for updated dates")
+                    raise ValueError("Vehicle not available for updated dates")
+
+                cursor.execute("""
+                    UPDATE Bookings
+                    SET user_id = %s, vehicle_id = %s, pickup_date = %s,
+                        return_date = %s, total_cost = %s, status = %s
+                    WHERE booking_id = %s
+                """, (updated_booking.user_id, updated_booking.vehicle_id,
+                      updated_booking.pickup_date, updated_booking.return_date,
+                      updated_booking.total_cost, updated_booking.status,
+                      booking_id))
+                
+                if cursor.rowcount == 0:
+                    self.logger.error(f"Booking {booking_id} not found")
+                    cursor.execute("ROLLBACK")
+                    return False
+
+                self._update_invoice(cursor, booking_id, updated_booking.total_cost)
+                self._log_email(cursor, booking_id, 'update')
+                
+                cursor.execute("COMMIT")
+                return True
+            except Error as e:
+                cursor.execute("ROLLBACK")
+                raise e
+            
+    def _update_invoice(self, cursor, booking_id: int, new_amount: float):
+        cursor.execute("""
+            UPDATE Invoices
+            SET amount = %s
+            WHERE booking_id = %s
+        """, (new_amount, booking_id))
+
+    def delete(self, booking_id: int) -> bool:
+        self.logger.info(f"Deleting booking: {booking_id}")
+        with self.db.get_cursor() as cursor:
+            cursor.execute("START TRANSACTION")
+            try:
+                cursor.execute("SELECT status FROM Bookings WHERE booking_id = %s", (booking_id,))
+                result = cursor.fetchone()
+                if not result:
+                    self.logger.error(f"Booking {booking_id} not found")
+                    return False
+                
+                status = result.get('status')
+             
+                if status == 'active':
+                    self.logger.error(f"Cannot delete active booking {booking_id}")
+                    raise ValueError("Cannot delete an active booking")
+                
+                cursor.execute("UPDATE Bookings SET is_deleted = TRUE WHERE booking_id = %s", (booking_id,))
+                cursor.execute("DELETE FROM Invoices WHERE booking_id = %s", (booking_id,))
+                self._log_email(cursor, booking_id, 'cancelled')
+
+                cursor.execute("COMMIT")
+                self.logger.info(f"Booking {booking_id} soft-deleted successfully")
+                return True
+            except Error as e:
+                cursor.execute("ROLLBACK")
+                raise e

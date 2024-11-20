@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 from models import Booking
 
-class TestBookingValidation(unittest.TestCase):
+class TestBookingClass(unittest.TestCase):
     def setUp(self):
         """Setup default dates for testing"""
         self.current_date = datetime(2024, 1, 1, 10, 0, 0)

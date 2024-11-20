@@ -13,7 +13,7 @@ class TestBookingRepository(unittest.TestCase):
         """Initialize test environment before each test"""
         self.db_mock = Mock()
         self.cursor_mock = Mock()
-        # Create a context manager mock
+   
         context_manager = Mock()
         context_manager.__enter__ = Mock(return_value=self.cursor_mock)
         context_manager.__exit__ = Mock(return_value=None)
@@ -33,12 +33,12 @@ class TestBookingRepository(unittest.TestCase):
         )
         
         self.cursor_mock.lastrowid = 1
-        self.cursor_mock.fetchone.return_value = None  # Vehicle is available
+        self.cursor_mock.fetchone.return_value = None  
         
         booking_id = self.booking_repo.create(booking)
         
         self.assertEqual(booking_id, 1)
-        self.cursor_mock.execute.assert_called()  # Verify SQL was executed
+        self.cursor_mock.execute.assert_called() 
    
     def test_vehicle_unavailable(self):
         """Test if previous booked vehicle is no longer available"""
@@ -50,10 +50,71 @@ class TestBookingRepository(unittest.TestCase):
             total_cost=100.0
         )
         
-        self.cursor_mock.fetchone.return_value = {'id': 1}  # Vehicle is not available
+        self.cursor_mock.fetchone.return_value = {'id': 1}  
         
         with self.assertRaises(ValueError):
             self.booking_repo.create(booking)
+    
+    def test_update_booking(self):
+        """Test updating an existing booking"""
+        booking = Booking(
+            user_id=1,
+            vehicle_id=1,
+            pickup_date=(datetime.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S"),
+            return_date=(datetime.now() + timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%S"),
+            total_cost=150.0,
+            status='pending'
+        )
+        
+        self.cursor_mock.fetchone.return_value = None 
+        self.cursor_mock.rowcount = 1 
+        
+        result = self.booking_repo.update(1, booking)
+        
+        self.assertTrue(result)
+        self.cursor_mock.execute.assert_called()
+
+    def test_update_booking_vehicle_unavailable(self):
+        """Test updating a booking when the vehicle becomes unavailable"""
+        booking = Booking(
+            user_id=1,
+            vehicle_id=1,
+            pickup_date=(datetime.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S"),
+            return_date=(datetime.now() + timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%S"),
+            total_cost=150.0,
+            status='pending'
+        )
+        
+        self.cursor_mock.fetchone.return_value = {'id': 1} 
+        
+        with self.assertRaises(ValueError):
+            self.booking_repo.update(1, booking)
+
+    def test_delete_booking(self):
+        """Test deleting a booking"""
+        self.cursor_mock.fetchone.return_value = ('pending',)  
+        
+        result = self.booking_repo.delete(1)
+        
+        self.assertTrue(result)
+        self.cursor_mock.execute.assert_called()  
+
+    def test_delete_active_booking(self):
+        """Test deleting an active booking (should raise ValueError)"""
+        self.cursor_mock.fetchone.return_value = ('active',) 
+        
+        with self.assertRaises(ValueError):
+            self.booking_repo.delete(1)
+
+    def test_delete_nonexistent_booking(self):
+        """Test deleting a booking that doesn't exist"""
+        self.cursor_mock.fetchone.return_value = None 
+        
+        result = self.booking_repo.delete(1)
+        
+        self.assertFalse(result)  
+    
+    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
