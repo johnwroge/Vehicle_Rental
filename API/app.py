@@ -12,15 +12,15 @@ def create_app():
 
     app.config['DATABASE'] = db 
 
-    @app.route('/db-test')
-    def db_test():  
-        try:
-            with app.config['DATABASE'].get_cursor() as cursor:
-                cursor.execute("SHOW TABLES")
-                tables = cursor.fetchall()
-                return f"Database connected. Tables: {tables}"
-        except Exception as e:
-            return f"Database connection error: {str(e)}"
+    # @app.route('/db-test')
+    # def db_test():  
+    #     try:
+    #         with app.config['DATABASE'].get_cursor() as cursor:
+    #             cursor.execute("SHOW TABLES")
+    #             tables = cursor.fetchall()
+    #             return f"Database connected. Tables: {tables}"
+    #     except Exception as e:
+    #         return f"Database connection error: {str(e)}"
 
     return app
  

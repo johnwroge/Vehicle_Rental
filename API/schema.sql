@@ -24,7 +24,7 @@ CREATE TABLE VehicleCategories (
     CONSTRAINT chk_daily_rate CHECK (daily_rate > 0)
 );
 
--- Vehicles table
+-- Vehicles Table
 CREATE TABLE Vehicles (
     vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
