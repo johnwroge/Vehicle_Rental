@@ -33,6 +33,17 @@ To use the Car Rental microservice, first change into the API directory.
 
 `pip install -r requirements.txt` 
 
+## Create env file with database credentials
+
+example:
+
+```env
+DB_HOST=localhost
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_NAME=vehicle_rental
+```
+
 ## MySQL Notes
 
 Ensure MySQL is available on you workstation. 
