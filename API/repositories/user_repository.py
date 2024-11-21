@@ -1,7 +1,7 @@
 
 from database import Database
-from models import User, Vehicle, Booking
-from typing import List, Optional
+from models import User
+from typing import Optional
 from mysql.connector import Error
 import logging
 

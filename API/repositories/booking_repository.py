@@ -1,7 +1,6 @@
 
 from database import Database
-from models import User, Vehicle, Booking, BookingStatus
-from typing import List, Optional
+from models import Booking
 from mysql.connector import Error
 from datetime import datetime
 import logging
@@ -16,22 +15,32 @@ class BookingRepository:
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
+
     def create(self, booking: Booking) -> int:
         self.logger.info(f"Creating new booking: {booking}")
         with self.db.get_cursor() as cursor:
- 
             cursor.execute("START TRANSACTION")
             try:
+                # Check if vehicle exists
+                cursor.execute("SELECT 1 FROM Vehicles WHERE vehicle_id = %s", (booking.vehicle_id,))
+                if not cursor.fetchone():
+                    raise ValueError(f"Vehicle with ID {booking.vehicle_id} does not exist")
+
+                # Check if user exists
+                cursor.execute("SELECT 1 FROM Users WHERE user_id = %s", (booking.user_id,))
+                if not cursor.fetchone():
+                    raise ValueError(f"User with ID {booking.user_id} does not exist")
+
                 if not self._is_vehicle_available(cursor, booking):
                     self.logger.error("Vehicle not available for selected dates")
                     raise ValueError("Vehicle not available for selected dates")
 
                 cursor.execute("""
                     INSERT INTO Bookings (user_id, vehicle_id, pickup_date, 
-                                        return_date, total_cost, status)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                                        return_date, total_cost)
+                    VALUES (%s, %s, %s, %s, %s)
                 """, (booking.user_id, booking.vehicle_id, booking.pickup_date,
-                      booking.return_date, booking.total_cost, booking.status.value))
+                    booking.return_date, booking.total_cost))
                 
                 booking_id = cursor.lastrowid
 
@@ -43,7 +52,21 @@ class BookingRepository:
                 return booking_id
             except Error as e:
                 cursor.execute("ROLLBACK")
-                raise e
+                if e.errno == 1452:  # Foreign key constraint fails
+                    if 'vehicles' in str(e):
+                        raise ValueError(f"Vehicle with ID {booking.vehicle_id} does not exist")
+                    elif 'users' in str(e):
+                        raise ValueError(f"User with ID {booking.user_id} does not exist")
+                self.logger.error(f"Database error while creating booking: {e}")
+                raise
+            except ValueError as e:
+                cursor.execute("ROLLBACK")
+                self.logger.error(f"Validation error while creating booking: {e}")
+                raise
+            except Exception as e:
+                cursor.execute("ROLLBACK")
+                self.logger.error(f"Unexpected error while creating booking: {e}")
+                raise
 
     def _is_vehicle_available(self, cursor, booking: Booking) -> bool:
         cursor.execute("""
@@ -88,7 +111,7 @@ class BookingRepository:
         with self.db.get_cursor() as cursor:
             cursor.execute("START TRANSACTION")
             try:
-                if not self._is_vehicle_available(cursor, updated_booking):
+                if self._is_vehicle_available(cursor, updated_booking):
                     self.logger.error("Vehicle not available for updated dates")
                     raise ValueError("Vehicle not available for updated dates")
 
@@ -133,10 +156,10 @@ class BookingRepository:
                 if not result:
                     self.logger.error(f"Booking {booking_id} not found")
                     return False
-                print(result)
-                # status = result.get('status')
-                status = result[0]
-             
+                
+                status =  result.get('status') or result[0]
+                # status = result[0]
+                
                 if status == 'active':
                     self.logger.error(f"Cannot delete active booking {booking_id}")
                     raise ValueError("Cannot delete an active booking")

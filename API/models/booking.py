@@ -11,7 +11,8 @@ class Booking:
     return_date: str
     total_cost: float
     booking_id: Optional[int] = None
-    status: BookingStatus = BookingStatus.PENDING
+    # status: BookingStatus = BookingStatus.PENDING
+    status: str = 'pending'
     created_at: Optional[datetime] = None
 
     def __post_init__(self):

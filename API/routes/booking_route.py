@@ -3,7 +3,7 @@ from services.booking_service import BookingService
 from datetime import datetime
 from repositories import BookingRepository
 from repositories.vehicle_repository import VehicleRepository
-from database import Database
+from mysql.connector import Error as MySQLError
 
 bookings_api = Blueprint('bookings_api', __name__)
 
@@ -14,14 +14,39 @@ def create_booking():
         booking_service = BookingService(booking_repo)
         booking_id = booking_service.create_booking(request.json)
         return jsonify({'booking_id': booking_id}), 201
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+    except MySQLError as e:
+        error_code = e.errno
+        if error_code == 1452:  # Foreign key constraint fails
+            if 'vehicles' in str(e):
+                return jsonify({
+                    'error': 'Invalid Vehicle',
+                    'details': 'The specified vehicle does not exist in the database.'
+                }), 400
+            elif 'users' in str(e):
+                return jsonify({
+                    'error': 'Invalid User',
+                    'details': 'The specified user does not exist in the database.'
+                }), 400
+            else:
+                return jsonify({
+                    'error': 'Foreign Key Constraint Violation',
+                    'details': 'A referenced record does not exist.'
+                }), 400
+        elif error_code == 1062:  # Duplicate entry
+            return jsonify({
+                'error': 'Duplicate Entry',
+                'details': 'A booking with these details already exists.'
+            }), 400
+        else:
+            current_app.logger.error(f"Database error: {e}", exc_info=True)
+            return jsonify({
+                'error': 'Database Error',
+                'details': f"An error occurred while processing your request. Error code: {error_code}"
+            }), 500
     except Exception as e:
-        
         current_app.logger.error(f"Error occurred while creating booking: {e}", exc_info=True)
-        
         return jsonify({
-            'error': 'An unexpected error occurred while processing your booking request. Please try again later.',
+            'error': 'An unexpected error occurred while processing your booking request.',
             'details': str(e)
         }), 500
 

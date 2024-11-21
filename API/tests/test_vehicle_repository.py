@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime
 from repositories.vehicle_repository import VehicleRepository
 from models import Vehicle, VehicleStatus
 from unittest.mock import Mock

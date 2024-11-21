@@ -42,7 +42,7 @@ Run the MySQL script to create the database and tables.
 
 `python initialize_schema.py`
 
-I created a script that pre populates the database with information to prevent
+I created a script that pre populates the database with user and vehicle information to prevent
 foreign key errors since they are required to create bookings. To run this script:
 
 `python db_populate.py`

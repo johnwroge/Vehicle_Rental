@@ -76,12 +76,5 @@ class TestBookingRoutes(unittest.TestCase):
         self.assertEqual(response.json["error"], "Vehicle not available")
         logger.info("Service error test completed")
 
-    # def test_get_bookings(self):
-    #     """Test get bookings endpoint"""
-    #     response = self.client.get('/api/bookings')
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(response.data.decode(), 'Success')
-    #     logger.info("Get bookings test completed")
-
 if __name__ == '__main__':
     unittest.main(verbosity=2)
