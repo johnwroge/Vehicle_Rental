@@ -21,12 +21,10 @@ class BookingRepository:
         with self.db.get_cursor() as cursor:
             cursor.execute("START TRANSACTION")
             try:
-                # Check if vehicle exists
                 cursor.execute("SELECT 1 FROM Vehicles WHERE vehicle_id = %s", (booking.vehicle_id,))
                 if not cursor.fetchone():
                     raise ValueError(f"Vehicle with ID {booking.vehicle_id} does not exist")
 
-                # Check if user exists
                 cursor.execute("SELECT 1 FROM Users WHERE user_id = %s", (booking.user_id,))
                 if not cursor.fetchone():
                     raise ValueError(f"User with ID {booking.user_id} does not exist")
@@ -52,7 +50,7 @@ class BookingRepository:
                 return booking_id
             except Error as e:
                 cursor.execute("ROLLBACK")
-                if e.errno == 1452:  # Foreign key constraint fails
+                if e.errno == 1452: 
                     if 'vehicles' in str(e):
                         raise ValueError(f"Vehicle with ID {booking.vehicle_id} does not exist")
                     elif 'users' in str(e):
@@ -93,7 +91,7 @@ class BookingRepository:
 
     def _log_email(self, cursor, booking_id: int, email_type: str):
         email_type_map = {
-            'update': 'confirmation',  # Map 'update' to 'confirmation'
+            'update': 'confirmation',  
             'confirmation': 'confirmation',
             'invoice': 'invoice',
             'cancelled': 'cancelled'
