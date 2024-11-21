@@ -17,3 +17,6 @@ mysql.cnf
 dist/
 build/
 *.egg-info/
+deleted
+
+

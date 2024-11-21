@@ -157,8 +157,9 @@ class BookingRepository:
                     self.logger.error(f"Booking {booking_id} not found")
                     return False
                 
-                status =  result.get('status') or result[0]
+                # status =  result.get('status') or result[0]
                 # status = result[0]
+                status = result['status'] if isinstance(result, dict) else result[0]
                 
                 if status == 'active':
                     self.logger.error(f"Cannot delete active booking {booking_id}")

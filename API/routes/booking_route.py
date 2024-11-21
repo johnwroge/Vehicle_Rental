@@ -16,7 +16,7 @@ def create_booking():
         return jsonify({'booking_id': booking_id}), 201
     except MySQLError as e:
         error_code = e.errno
-        if error_code == 1452:  # Foreign key constraint fails
+        if error_code == 1452: 
             if 'vehicles' in str(e):
                 return jsonify({
                     'error': 'Invalid Vehicle',
@@ -32,7 +32,7 @@ def create_booking():
                     'error': 'Foreign Key Constraint Violation',
                     'details': 'A referenced record does not exist.'
                 }), 400
-        elif error_code == 1062:  # Duplicate entry
+        elif error_code == 1062:  
             return jsonify({
                 'error': 'Duplicate Entry',
                 'details': 'A booking with these details already exists.'
