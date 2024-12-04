@@ -57,21 +57,61 @@ class VehicleRepository:
             result = cursor.fetchone()
             return Vehicle.from_db_dict(result) if result else None
 
-    def get_available_vehicles(self, category_id: Optional[int] = None) -> List[Vehicle]:
+    def get_available_vehicles(self, start_date: datetime, end_date: datetime,
+                            category_id: Optional[int] = None,
+                            vehicle_id: Optional[int] = None) -> List[dict]:
         with self.db.get_cursor() as cursor:
             query = """
-                SELECT * FROM Vehicles 
-                WHERE status = %s
+                SELECT DISTINCT 
+                    v.vehicle_id,
+                    v.status,
+                    v.category_id,
+                    v.make,
+                    v.model,
+                    v.year,
+                    v.last_maintenance,
+                    vc.daily_rate
+                FROM Vehicles v
+                INNER JOIN VehicleCategories vc ON v.category_id = vc.category_id
+                LEFT JOIN Bookings b ON v.vehicle_id = b.vehicle_id
+                WHERE v.status = %s
+                AND (b.booking_id IS NULL
+                    OR NOT (
+                        (b.pickup_date BETWEEN %s AND %s)
+                        OR (b.return_date BETWEEN %s AND %s)
+                        OR (b.pickup_date <= %s AND b.return_date >= %s)
+                    ))
             """
-            params = [VehicleStatus.AVAILABLE.value]
+            params = [VehicleStatus.AVAILABLE.name, start_date, end_date, 
+                    start_date, end_date, start_date, end_date]
             
             if category_id:
-                query += " AND category_id = %s"
+                query += " AND v.category_id = %s"
                 params.append(category_id)
-                
+            
+            if vehicle_id:
+                query += " AND v.vehicle_id = %s"
+                params.append(vehicle_id)
+                    
             cursor.execute(query, tuple(params))
             results = cursor.fetchall()
-            return [Vehicle.from_db_dict(row) for row in results]
+            return [
+                {
+                    "vehicle_id": row["vehicle_id"],
+                    "status": row["status"],
+                    "category_id": row["category_id"],
+                    "make": row["make"],
+                    "model": row["model"],
+                    "year": row["year"],
+                    "last_maintenance": row["last_maintenance"],
+                    "daily_rate": row["daily_rate"]
+                }
+                for row in results
+            ]
+
+
+
+
 
     def update_status(self, vehicle_id: int, status: VehicleStatus) -> None:
         with self.db.get_cursor() as cursor:

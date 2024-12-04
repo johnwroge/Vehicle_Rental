@@ -17,20 +17,52 @@ so they can expect those errors. Need to get pedantic. The user needs the feedba
 '''
 
 @vehicles_api.route('/vehicles/availability', methods=['GET'])
-
 def check_availability():
     try:
-        start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
-        end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d')
-        category_id = request.args.get('category_id')
-        vehicle_id = request.args.get('vehicle_id')
+        # Check required fields
+        required_fields = ['start_date', 'end_date']
+        missing_fields = [field for field in required_fields if not request.args.get(field)]
+        if missing_fields:
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required fields',
+                'details': f"Missing: {', '.join(missing_fields)}"
+            }), 400
+
+        # Parse dates
+        try:
+            start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')
+            end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d')
+        except ValueError:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid date format',
+                'details': 'Dates must be in YYYY-MM-DD format'
+            }), 400
+
+        # Optional fields
+        category_id = int(request.args.get('category_id')) if request.args.get('category_id') else None
+        vehicle_id = int(request.args.get('vehicle_id')) if request.args.get('vehicle_id') else None
 
         vehicle_repo = VehicleRepository()
         vehicle_service = VehicleService(vehicle_repo)
-        vehicles = vehicle_service._is_vehicle_available(
+        vehicles = vehicle_service.check_availability(  # Changed method name
             start_date, end_date, category_id, vehicle_id
         )
-        return jsonify(vehicles)
+        
+        return jsonify({
+            'status': 'success',
+            'data': vehicles
+        })
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': 'Internal server error',
+            'details': str(e)
+        }), 500

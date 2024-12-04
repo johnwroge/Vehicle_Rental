@@ -66,7 +66,7 @@ class TestUserRepository(unittest.TestCase):
             first_name="Jane",
             last_name="Doe",
             password_hash="temp_hash"  
-
+        )
         updated = self.user_repository.update(user)
 
         self.assertTrue(updated)
