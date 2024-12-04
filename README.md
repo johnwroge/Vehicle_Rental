@@ -77,8 +77,7 @@ For more detailed readout use the -v flag.
 
 `python -m unittest discover tests -v`
 
-Manual testing was performed to ensure that create/update/delete functionality for bookings was working. I can send 
-my manual tests if requested. 
+Manual testing was performed to ensure that create/update/delete functionality for bookings was working. I can send my manual tests if requested. 
 
 # Car Rental API Project Checklist
 
@@ -96,10 +95,10 @@ my manual tests if requested.
 
 ### API Endpoints
 #### User Operations
-- [x] Implement CREATE user endpoint
-- [x] Implement READ user endpoint
-- [x] Implement UPDATE user endpoint
-- [x] Implement DELETE user endpoint
+- [ ] Implement CREATE user endpoint
+- [ ] Implement READ user endpoint
+- [ ] Implement UPDATE user endpoint
+- [ ] Implement DELETE user endpoint
 
 #### Vehicle Operations
 - [x] Create endpoint to check availability/status of a particular vehicle

@@ -1,11 +1,23 @@
 from flask import Blueprint, request, jsonify
 from services import VehicleService
 from datetime import datetime
-from repositories import BookingRepository, VehicleRepository
+from repositories import VehicleRepository
 
 vehicles_api = Blueprint('vehicles_api', __name__)
 
+'''
+"""
+http://127.0.0.1:5000/api/vehicles/availability
+
+should be using params, and use a conditional. 
+user input validation can also be used. if not receiving fields 40x back to user 
+saying we need those fields. In documentation, should also show this in api documentation
+so they can expect those errors. Need to get pedantic. The user needs the feedback. 
+"""
+'''
+
 @vehicles_api.route('/vehicles/availability', methods=['GET'])
+
 def check_availability():
     try:
         start_date = datetime.strptime(request.args.get('start_date'), '%Y-%m-%d')

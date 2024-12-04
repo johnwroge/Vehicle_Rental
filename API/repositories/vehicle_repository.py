@@ -6,6 +6,11 @@ from database import Database
 from models import Vehicle, VehicleStatus
 import logging
 
+'''
+
+for logging: for debugging we could use a constant to allow for the debugging testing but 
+wouldn't produce in the production environment. 
+'''
 class VehicleRepository:
     def __init__(self):
         self.db = Database()

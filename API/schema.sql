@@ -10,6 +10,8 @@ CREATE TABLE Users (
     last_name VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    -- this constraint may cause problems down the line
     CONSTRAINT chk_email CHECK (email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 

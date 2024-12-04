@@ -7,6 +7,7 @@ class User:
     email: str
     first_name: str
     last_name: str
+    password_hash: str
     user_id: Optional[int] = None
     created_at: Optional[datetime] = None
 

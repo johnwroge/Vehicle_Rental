@@ -5,6 +5,10 @@ from mysql.connector import Error
 from datetime import datetime
 import logging
 
+'''
+for logging: for debugging we could use a constant to allow for the debugging testing but 
+wouldn't produce in the production environment. 
+'''
 class BookingRepository:
     def __init__(self):
         self.db = Database()

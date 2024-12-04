@@ -36,7 +36,10 @@ class UserRepository:
 
     def get_by_id(self, user_id: int) -> Optional[User]:
         with self.db.get_cursor() as cursor:
-            cursor.execute("SELECT * FROM Users WHERE user_id = %s", (user_id,))
+            cursor.execute(
+                "SELECT user_id, email, first_name, last_name, password_hash, created_at FROM Users WHERE user_id = %s AND is_deleted = FALSE", 
+                (user_id,)
+            )
             data = cursor.fetchone()
             return User.from_db_dict(data) if data else None
 
@@ -52,5 +55,5 @@ class UserRepository:
         
     def delete(self, user_id: int) -> bool:
         with self.db.get_cursor() as cursor:
-            cursor.execute("DELETE FROM Users WHERE user_id = %s", (user_id,))
+            cursor.execute("UPDATE Users SET is_deleted = TRUE WHERE user_id = %s", (user_id,))
             return cursor.rowcount > 0

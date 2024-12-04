@@ -86,11 +86,19 @@ def delete_booking(booking_id):
             'details': str(e)
         }), 500
 
+'''
+
+should be using params, and use a conditional. 
+user input validation can also be used. if not receiving fields 40x back to user 
+saying we need those fields. In documentation, should also show this in api documentation
+so they can expect those errors. Need to get pedantic. The user needs the feedback. 
+'''
+
 @bookings_api.route('/daily_report', methods=['GET'])
 def get_daily_report():
     date_str = request.args.get('date')
     category_id = request.args.get('category_id', type=int)
-
+    # this is the correct approach, try-catch for sanity checks. 
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
